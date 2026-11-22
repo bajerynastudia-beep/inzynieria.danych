@@ -1,0 +1,15 @@
+sources:
+  - name: lunchlink
+    database: inzynieria-danych-513814
+    schema: inzynieria_danych
+    tables:
+      - name: dostawcy
+        identifier: dostawcy
+      - name: klienci
+        identifier: klienci
+      - name: produkty
+        identifier: produkty
+      - name: zamowienia
+        identifier: zamowienia
+      - name: pozycje_zamowienia
+        identifier: pozycje_zamowienia
