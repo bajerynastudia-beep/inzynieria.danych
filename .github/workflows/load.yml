@@ -31,8 +31,8 @@ jobs:
           GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
           # --- TODO: studenci uzupełniają poniższe trzy wartości ---
           BQ_PROJECT_ID: inzynieria-danych-513814
-          BQ_DATASET: inzynieria-danych-513814.inzynieria_danych
-          BQ_TABLE: test
+          BQ_DATASET: inzynieria_danych
+          BQ_TABLE: klienci
         run: python extract_load.py
 
       - name: Clean up key file
