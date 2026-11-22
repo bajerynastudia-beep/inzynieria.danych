@@ -1,0 +1,91 @@
+version: 2
+
+# Testy dbt dla warstwy transform (SCD1 i SCD2)
+models:
+  - name: trf_dostawcy_scd1
+    description: "Aktualny stan dostawców (SCD 1)."
+    columns:
+      - name: id
+        data_tests: [unique, not_null]
+      - name: miasto
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Wrocław', 'Kraków', 'Poznań']
+
+  - name: trf_klienci_scd1
+    description: "Aktualny stan klientów (SCD 1)."
+    columns:
+      - name: id
+        data_tests: [unique, not_null]
+      - name: miasto
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['Wrocław', 'Kraków', 'Poznań']
+
+  - name: trf_produkty_scd1
+    description: "Aktualny stan produktów (SCD 1)."
+    columns:
+      - name: id
+        data_tests: [unique, not_null]
+      - name: dostawca_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('trf_dostawcy_scd1')
+                field: id
+      - name: cena
+        data_tests: [not_null]
+
+  - name: trf_zamowienia_scd1
+    description: "Aktualny stan zamówień (SCD 1)."
+    columns:
+      - name: id
+        data_tests: [unique, not_null]
+      - name: klient_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('trf_klienci_scd1')
+                field: id
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['zlozone', 'dostarczone', 'anulowane']
+
+  - name: trf_pozycje_zamowienia_scd1
+    description: "Aktualny stan pozycji zamówień (SCD 1)."
+    columns:
+      - name: zamowienie_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('trf_zamowienia_scd1')
+                field: id
+      - name: produkt_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('trf_produkty_scd1')
+                field: id
+
+  - name: trf_dostawcy_scd2
+    description: "Historia dostawców (SCD 2)."
+    columns:
+      - name: dostawcy_sk
+        data_tests: [unique, not_null]
+
+  - name: trf_klienci_scd2
+    description: "Historia klientów (SCD 2)."
+    columns:
+      - name: klienci_sk
+        data_tests: [unique, not_null]
+
+  - name: trf_produkty_scd2
+    description: "Historia produktów (SCD 2)."
+    columns:
+      - name: produkty_sk
+        data_tests: [unique, not_null]
