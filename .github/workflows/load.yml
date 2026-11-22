@@ -10,6 +10,13 @@ jobs:
   extract-and-load:
     runs-on: ubuntu-latest
 
+    # wspólne ustawienia dla wszystkich kroków ładowania
+    env:
+      NEON_CONNECTION_STRING: ${{ secrets.NEON_API_KEY }}
+      GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
+      BQ_PROJECT_ID: inzynieria-danych-513814
+      BQ_DATASET: inzynieria_danych
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,14 +32,39 @@ jobs:
       - name: Write GCP service account key to file
         run: echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
 
-      - name: Run extract and load script
+      # --- Sekwencyjne ładowanie tabel według relacji PK-FK ---
+      # Kroki wykonują się po kolei; jeśli któryś się nie uda, kolejne nie ruszą,
+      # więc tabela podrzędna nigdy nie zostanie załadowana bez tabeli nadrzędnej.
+      # 1) tabele niezależne  2) tabele z FK do nich  3) encja słaba (dwa FK)
+
+      - name: "1/5 Load dostawcy"
         env:
-          NEON_CONNECTION_STRING: ${{ secrets.NEON_API_KEY }}
-          GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
-          # --- TODO: studenci uzupełniają poniższe trzy wartości ---
-          BQ_PROJECT_ID: inzynieria-danych-513814
-          BQ_DATASET: inzynieria_danych
+          SOURCE_TABLE: dostawcy
+          BQ_TABLE: dostawcy
+        run: python extract_load.py
+
+      - name: "2/5 Load klienci"
+        env:
+          SOURCE_TABLE: klienci
           BQ_TABLE: klienci
+        run: python extract_load.py
+
+      - name: "3/5 Load produkty (FK -> dostawcy)"
+        env:
+          SOURCE_TABLE: produkty
+          BQ_TABLE: produkty
+        run: python extract_load.py
+
+      - name: "4/5 Load zamowienia (FK -> klienci)"
+        env:
+          SOURCE_TABLE: zamowienia
+          BQ_TABLE: zamowienia
+        run: python extract_load.py
+
+      - name: "5/5 Load pozycje_zamowienia (FK -> zamowienia, produkty)"
+        env:
+          SOURCE_TABLE: pozycje_zamowienia
+          BQ_TABLE: pozycje_zamowienia
         run: python extract_load.py
 
       - name: Clean up key file

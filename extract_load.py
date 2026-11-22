@@ -2,8 +2,9 @@
 Extract & Load: Neon (PostgreSQL) -> BigQuery
 
 Ten skrypt jest uruchamiany przez GitHub Actions (patrz .github/workflows/load.yml).
-Zmienne środowiskowe (NEON_CONNECTION_STRING, BQ_PROJECT_ID, BQ_DATASET, BQ_TABLE)
-są ustawiane w kroku workflow, na podstawie GitHub Secrets.
+Zmienne środowiskowe (NEON_CONNECTION_STRING, BQ_PROJECT_ID, BQ_DATASET, BQ_TABLE,
+SOURCE_TABLE) są ustawiane w workflow, na podstawie GitHub Secrets.
+Workflow uruchamia skrypt kolejno dla każdej tabeli, w kolejności relacji PK-FK.
 
 Studenci uzupełniają / modyfikują sekcję "KONFIGURACJA" poniżej.
 """
@@ -22,15 +23,16 @@ BQ_PROJECT_ID = os.environ["BQ_PROJECT_ID"]
 BQ_DATASET = os.environ["BQ_DATASET"]
 BQ_TABLE = os.environ["BQ_TABLE"]
 
-# TODO: nazwa tabeli źródłowej w Neon (ta, którą wypełnialiście w Lab 1)
-SOURCE_TABLE = "klienci"
+# Nazwa tabeli źródłowej w Neon -- podawana przez workflow dla każdego kroku
+# (dostawcy -> klienci -> produkty -> zamowienia -> pozycje_zamowienia)
+SOURCE_TABLE = os.environ["SOURCE_TABLE"]
 
 # TODO: kolumna używana do wykrywania nowych/zmienionych wierszy przy incremental load
 INCREMENTAL_COLUMN = "updated_at"
 
 # TODO: "full_refresh" -> zawsze ładuje wszystko od nowa (nadpisuje tabelę w BigQuery)
 #       "incremental"  -> ładuje tylko wiersze nowsze niż ostatnio załadowane
-LOAD_MODE = "incremental"
+LOAD_MODE = "full_refresh"
 
 # ============================================================
 # LOGIKA -- zwykle nie trzeba tego modyfikować
