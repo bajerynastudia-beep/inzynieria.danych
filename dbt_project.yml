@@ -40,3 +40,11 @@ models:
     # Applies to all files under models/example/
     example:
       +materialized: table
+    # Strategia materializacji projektu:
+    # transform – SCD1 i SCD2_uf jako widoki (lekkie, zawsze aktualne),
+    #             SCD2 jako tabela (ustawione w config() w pliku modelu)
+    transform:
+      +materialized: view
+    # gold – model gwiazdy jako tabele (szybki odczyt dla raportów)
+    gold:
+      +materialized: table

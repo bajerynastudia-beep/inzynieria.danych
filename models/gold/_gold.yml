@@ -1,0 +1,57 @@
+version: 2
+
+# Warstwa gold – model gwiazdy (fakt_sprzedaz + 4 wymiary) i jego testy
+models:
+  - name: dim_data
+    columns:
+      - name: data_sk
+        data_tests: [unique, not_null]
+
+  - name: dim_klienci
+    columns:
+      - name: klient_sk
+        data_tests: [unique, not_null]
+
+  - name: dim_dostawcy
+    columns:
+      - name: dostawca_sk
+        data_tests: [unique, not_null]
+
+  - name: dim_produkty
+    columns:
+      - name: produkt_sk
+        data_tests: [unique, not_null]
+      - name: miasto
+        data_tests: [not_null]
+
+  - name: fakt_sprzedaz
+    columns:
+      - name: data_sk
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_data')
+                field: data_sk
+      - name: klient_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_klienci')
+                field: klient_sk
+      - name: produkt_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_produkty')
+                field: produkt_sk
+      - name: dostawca_sk
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_dostawcy')
+                field: dostawca_sk
+      - name: miasto
+        data_tests: [not_null]
